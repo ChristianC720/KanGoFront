@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.slick-arrow::before {
+  @apply opacity-100 text-[#05843D] text-4xl transition-all duration-200 ease-in-out hover:scale-110;
+}
+
+.slick-arrow {
+  @apply !flex items-center justify-center bg-white rounded-full hover:bg-white;
+}
