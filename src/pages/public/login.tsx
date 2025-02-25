@@ -41,7 +41,7 @@ const Login: React.FC = () => {
 
       if (response.ok) {
         localStorage.setItem("token", data.token);
-        localStorage.setItem("rol", data.rol);
+        localStorage.setItem("userRol", data.rol);
         setRole(data.rol);
         setLoginSuccess(true);
       } else {
