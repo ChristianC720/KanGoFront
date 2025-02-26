@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { register } from "../../services/api";
+import DOMPurify from 'dompurify';
+
 
 const Register: React.FC = () => {
   const [nombre, setNombre] = useState("");
@@ -12,14 +14,24 @@ const Register: React.FC = () => {
   const [qrCode, setQrCode] = useState("");
   const navigate = useNavigate();
 
-  const allowedCharsRegex = /^[a-zA-Z0-9.@* ]+$/;
 
+  const validateInput = (input: string): boolean => {
+    const regex = /^[a-zA-Z0-9!#$'*+-=?^_`~@.]*$/;
+    return regex.test(input);
+  };
+
+    
   const handleInputChange =
-    (setter: React.Dispatch<React.SetStateAction<string>>) =>
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      setter(event.target.value);
-      setError("");
-    };
+  (setter: React.Dispatch<React.SetStateAction<string>>) =>
+  (event: React.ChangeEvent<HTMLInputElement>) => {
+    const sanitizedValue = DOMPurify.sanitize(event.target.value);
+    if (validateInput(sanitizedValue)) {
+      setter(sanitizedValue);
+      setError('');
+    } else {
+      setError('Entrada inválida. Por favor, revisa los datos ingresados.');
+    }
+  };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
