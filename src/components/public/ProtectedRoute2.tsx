@@ -5,7 +5,7 @@ const ProtectedRoute2 = () => {
   const rol = localStorage.getItem("rol"); // Recupera el rol guardado al hacer login
 
   if (!token) {
-    return <Navigate to="/login" replace />; // 🔹 Si no hay sesión, lo manda a login
+    return <Navigate to="/" replace />; // 🔹 Si no hay sesión, lo manda a login
   }
 
   if (rol !== "admin") {

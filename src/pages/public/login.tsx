@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import DOMPurify from 'dompurify';
 
 const GOOGLE_CLIENT_ID =
   "973428652330-pf4rncidpkqktjhnfr12vmf63h9l3rrg.apps.googleusercontent.com";
@@ -15,18 +15,33 @@ const Login: React.FC = () => {
   const [role, setRole] = useState("");
   const navigate = useNavigate();
 
+  const validateInput = (input: string): boolean => {
+    const regex = /^[a-zA-Z0-9!#$'*+-=?^_`~@.]*$/;
+    return regex.test(input);
+  };
+
+  const handleGoogleError = () => {
+    setError('Error en el inicio de sesión con Google.');
+  };
+
   const handleInputChange =
-    (setter: React.Dispatch<React.SetStateAction<string>>) =>
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      setter(event.target.value);
-      setError("");
-    };
+        (setter: React.Dispatch<React.SetStateAction<string>>) =>
+        (event: React.ChangeEvent<HTMLInputElement>) => {
+          const sanitizedValue = DOMPurify.sanitize(event.target.value);
+          if (validateInput(sanitizedValue)) {
+            setter(sanitizedValue);
+            setError('');
+          } else {
+            setError('Entrada inválida. Por favor, revisa los datos ingresados.');
+          }
+        };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
     try {
       const response = await fetch("http://127.0.0.1:5000/auth/login", {
+        
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -38,10 +53,16 @@ const Login: React.FC = () => {
       });
 
       const data = await response.json();
+      if (!email || !password) {
+        setError('Todos los campos son obligatorios.');
+        return;
+      }
+  
+      console.log('Inicio de sesión exitoso con:', { email});
 
       if (response.ok) {
         localStorage.setItem("token", data.token);
-        localStorage.setItem("userRol", data.rol);
+        localStorage.setItem("rol", data.rol);
         setRole(data.rol);
         setLoginSuccess(true);
       } else {
@@ -85,7 +106,7 @@ const Login: React.FC = () => {
         if (role === "admin") {
           navigate("/admin/dashboard");
         } else {
-          navigate("/viewUser");
+          navigate("/landing");
         }
       }, 1500);
       return () => clearTimeout(timer);
@@ -148,7 +169,7 @@ const Login: React.FC = () => {
           </form>
           <GoogleLogin
             onSuccess={handleGoogleSuccess}
-            onError={() => alert("Error en Google Login")}
+            onError={handleGoogleError}
           />
           <p className="mt-6 text-base text-green-700 text-center cursor-pointer hover:underline">
             ¿Aún no tienes una cuenta? <Link to="/register">Regístrate</Link>
